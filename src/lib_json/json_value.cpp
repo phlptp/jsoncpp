@@ -1000,8 +1000,8 @@ const Value& Value::operator[](int index) const {
   return (*this)[ArrayIndex(index)];
 }
 
-void Value::initBasic(ValueType type, bool allocated) {
-  setType(type);
+void Value::initBasic(ValueType valueType, bool allocated) {
+  setType(valueType);
   setIsAllocated(allocated);
   comments_ = Comments{};
   start_ = 0;
@@ -1089,13 +1089,13 @@ Value& Value::resolveReference(const char* key) {
 }
 
 // @param key is not null-terminated.
-Value& Value::resolveReference(char const* key, char const* end) {
+Value& Value::resolveReference(char const* keyStart, char const* keyEnd) {
   JSON_ASSERT_MESSAGE(
       type() == nullValue || type() == objectValue,
       "in Json::Value::resolveReference(key, end): requires objectValue");
   if (type() == nullValue)
     *this = Value(objectValue);
-  CZString actualKey(key, static_cast<unsigned>(end - key),
+  CZString actualKey(keyStart, static_cast<unsigned>(keyEnd - keyStart),
                      CZString::duplicateOnCopy);
   auto it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
