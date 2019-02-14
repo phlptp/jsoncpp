@@ -149,7 +149,7 @@ ValueIterator::ValueIterator(const ValueConstIterator& other)
   throwRuntimeError("ConstIterator to Iterator should never be allowed.");
 }
 
-ValueIterator::ValueIterator(const ValueIterator& other) = default;
+ValueIterator::ValueIterator(const ValueIterator& /*other*/) = default;
 
 ValueIterator& ValueIterator::operator=(const SelfType& other) {
   copy(other);

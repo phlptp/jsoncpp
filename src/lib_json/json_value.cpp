@@ -252,15 +252,16 @@ LogicError::LogicError(String const& msg) : Exception(msg) {}
 // Notes: policy_ indicates if the string was allocated when
 // a string is stored.
 
-Value::CZString::CZString(ArrayIndex index) : cstr_(nullptr), index_(index) {}
+Value::CZString::CZString(ArrayIndex arrayIndex)
+    : cstr_(nullptr), index_(arrayIndex) {}
 
 Value::CZString::CZString(char const* str,
-                          unsigned length,
+                          unsigned stringLength,
                           DuplicationPolicy allocate)
     : cstr_(str) {
   // allocate != duplicate
   storage_.policy_ = allocate & 0x3;
-  storage_.length_ = length & 0x3FFFFFFF;
+  storage_.length_ = stringLength & 0x3FFFFFFF;
 }
 
 Value::CZString::CZString(const CZString& other) {
@@ -364,10 +365,10 @@ bool Value::CZString::isStaticString() const {
  * memset( this, 0, sizeof(Value) )
  * This optimization is used in ValueInternalMap fast allocator.
  */
-Value::Value(ValueType type) {
+Value::Value(ValueType vType) {
   static char const emptyString[] = "";
-  initBasic(type);
-  switch (type) {
+  initBasic(vType);
+  switch (vType) {
   case nullValue:
     break;
   case intValue:
@@ -426,10 +427,10 @@ Value::Value(const char* value) {
       value, static_cast<unsigned>(strlen(value)));
 }
 
-Value::Value(const char* begin, const char* end) {
+Value::Value(const char* beginChar, const char* endChar) {
   initBasic(stringValue, true);
-  value_.string_ =
-      duplicateAndPrefixStringValue(begin, static_cast<unsigned>(end - begin));
+  value_.string_ = duplicateAndPrefixStringValue(
+      beginChar, static_cast<unsigned>(endChar - beginChar));
 }
 
 Value::Value(const String& value) {
@@ -643,15 +644,15 @@ unsigned Value::getCStringLength() const {
 }
 #endif
 
-bool Value::getString(char const** begin, char const** end) const {
+bool Value::getString(char const** beginPtr, char const** endPtr) const {
   if (type() != stringValue)
     return false;
   if (value_.string_ == nullptr)
     return false;
   unsigned length;
   decodePrefixedString(this->isAllocated(), this->value_.string_, &length,
-                       begin);
-  *end = *begin + length;
+                       beginPtr);
+  *endPtr = *beginPtr + length;
   return true;
 }
 
@@ -1004,8 +1005,8 @@ const Value& Value::operator[](int index) const {
   return (*this)[ArrayIndex(index)];
 }
 
-void Value::initBasic(ValueType type, bool allocated) {
-  setType(type);
+void Value::initBasic(ValueType valueType, bool allocated) {
+  setType(valueType);
   setIsAllocated(allocated);
   comments_ = Comments{};
   start_ = 0;
@@ -1093,13 +1094,13 @@ Value& Value::resolveReference(const char* key) {
 }
 
 // @param key is not null-terminated.
-Value& Value::resolveReference(char const* key, char const* end) {
+Value& Value::resolveReference(char const* keyStart, char const* keyEnd) {
   JSON_ASSERT_MESSAGE(
       type() == nullValue || type() == objectValue,
       "in Json::Value::resolveReference(key, end): requires objectValue");
   if (type() == nullValue)
     *this = Value(objectValue);
-  CZString actualKey(key, static_cast<unsigned>(end - key),
+  CZString actualKey(keyStart, static_cast<unsigned>(keyEnd - keyStart),
                      CZString::duplicateOnCopy);
   auto it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
@@ -1118,13 +1119,13 @@ Value Value::get(ArrayIndex index, const Value& defaultValue) const {
 
 bool Value::isValidIndex(ArrayIndex index) const { return index < size(); }
 
-Value const* Value::find(char const* begin, char const* end) const {
+Value const* Value::find(char const* beginChar, char const* endChar) const {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == objectValue,
                       "in Json::Value::find(begin, end): requires "
                       "objectValue or nullValue");
   if (type() == nullValue)
     return nullptr;
-  CZString actualKey(begin, static_cast<unsigned>(end - begin),
+  CZString actualKey(beginChar, static_cast<unsigned>(endChar - beginChar),
                      CZString::noDuplication);
   ObjectValues::const_iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
@@ -1180,10 +1181,10 @@ Value& Value::append(Value&& value) {
   return (*this)[size()] = std::move(value);
 }
 
-Value Value::get(char const* begin,
-                 char const* end,
+Value Value::get(char const* beginChar,
+                 char const* endChar,
                  Value const& defaultValue) const {
-  Value const* found = find(begin, end);
+  Value const* found = find(beginChar, endChar);
   return !found ? defaultValue : *found;
 }
 Value Value::get(char const* key, Value const& defaultValue) const {
@@ -1193,11 +1194,13 @@ Value Value::get(String const& key, Value const& defaultValue) const {
   return get(key.data(), key.data() + key.length(), defaultValue);
 }
 
-bool Value::removeMember(const char* begin, const char* end, Value* removed) {
+bool Value::removeMember(const char* beginChar,
+                         const char* endChar,
+                         Value* removed) {
   if (type() != objectValue) {
     return false;
   }
-  CZString actualKey(begin, static_cast<unsigned>(end - begin),
+  CZString actualKey(beginChar, static_cast<unsigned>(endChar - beginChar),
                      CZString::noDuplication);
   auto it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
@@ -1255,8 +1258,8 @@ Value Value::get(const CppTL::ConstString& key,
 }
 #endif
 
-bool Value::isMember(char const* begin, char const* end) const {
-  Value const* value = find(begin, end);
+bool Value::isMember(char const* beginChar, char const* endChar) const {
+  Value const* value = find(beginChar, endChar);
   return nullptr != value;
 }
 bool Value::isMember(char const* key) const {

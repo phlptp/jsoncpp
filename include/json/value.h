@@ -82,7 +82,7 @@ public:
 
 /** \brief Type of the value held by a Value object.
  */
-enum ValueType {
+enum ValueType : unsigned char {
   nullValue = 0, ///< 'null' value
   intValue,      ///< signed integer value
   uintValue,     ///< unsigned integer value
@@ -240,8 +240,8 @@ private:
   class CZString {
   public:
     enum DuplicationPolicy { noDuplication = 0, duplicate, duplicateOnCopy };
-    CZString(ArrayIndex index);
-    CZString(char const* str, unsigned length, DuplicationPolicy allocate);
+    CZString(ArrayIndex arrayIndex);
+    CZString(char const* str, unsigned strinLength, DuplicationPolicy allocate);
     CZString(CZString const& other);
     CZString(CZString&& other);
     ~CZString();
@@ -296,7 +296,7 @@ public:
    *   Json::Value obj_value(Json::objectValue); // {}
    *   \endcode
    */
-  Value(ValueType type = nullValue);
+  Value(ValueType vType = nullValue);
   Value(Int value);
   Value(UInt value);
 #if defined(JSON_HAS_INT64)
@@ -305,7 +305,7 @@ public:
 #endif // if defined(JSON_HAS_INT64)
   Value(double value);
   Value(const char* value); ///< Copy til first 0. (NULL causes to seg-fault.)
-  Value(const char* begin, const char* end); ///< Copy all, incl zeroes.
+  Value(const char* beginChar, const char* endChar); ///< Copy all, incl zeroes.
   /**
    * \brief Constructs a value from a static string.
    *
@@ -368,7 +368,7 @@ public:
   /** Get raw char* of string-value.
    *  \return false if !string. (Seg-fault if str or end are NULL.)
    */
-  bool getString(char const** begin, char const** end) const;
+  bool getString(char const** beginPtr, char const** endPtr) const;
 #ifdef JSON_USE_CPPTL
   CppTL::ConstString asConstString() const;
 #endif
@@ -490,8 +490,9 @@ public:
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   /// \note key may contain embedded nulls.
-  Value
-  get(const char* begin, const char* end, const Value& defaultValue) const;
+  Value get(const char* beginChar,
+            const char* endChar,
+            const Value& defaultValue) const;
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   /// \param key may contain embedded nulls.
@@ -503,12 +504,13 @@ public:
 #endif
   /// Most general and efficient version of isMember()const, get()const,
   /// and operator[]const
-  /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
-  Value const* find(char const* begin, char const* end) const;
+  /// \note As stated elsewhere, behavior is undefined if (endChar-beginChar) >=
+  /// 2^30
+  Value const* find(char const* beginChar, char const* endChar) const;
   /// Most general and efficient version of object-mutators.
   /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
   /// \return non-zero, but JSON_ASSERT if this is neither object nor nullValue.
-  Value* demand(char const* begin, char const* end);
+  Value* demand(char const* beginChar, char const* endChar);
   /// \brief Remove and return the named member.
   ///
   /// Do nothing if it did not exist.
@@ -529,7 +531,7 @@ public:
    */
   bool removeMember(String const& key, Value* removed);
   /// Same as removeMember(String const& key, Value* removed)
-  bool removeMember(const char* begin, const char* end, Value* removed);
+  bool removeMember(const char* beginChar, const char* endChar, Value* removed);
   /** \brief Remove the indexed array element.
    *
    *  O(n) expensive operations.
@@ -545,7 +547,7 @@ public:
   /// \param key may contain embedded nulls.
   bool isMember(const String& key) const;
   /// Same as isMember(String const& key)const
-  bool isMember(const char* begin, const char* end) const;
+  bool isMember(const char* beginChar, const char* endChar) const;
 #ifdef JSON_USE_CPPTL
   /// Return true if the object has a member named key.
   bool isMember(const CppTL::ConstString& key) const;
