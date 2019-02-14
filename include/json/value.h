@@ -93,7 +93,7 @@ JSONCPP_NORETURN void throwLogicError(String const& msg);
 
 /** \brief Type of the value held by a Value object.
  */
-enum ValueType : unsigned int {
+enum ValueType : unsigned char {
   nullValue = 0, ///< 'null' value
   intValue,      ///< signed integer value
   uintValue,     ///< unsigned integer value
