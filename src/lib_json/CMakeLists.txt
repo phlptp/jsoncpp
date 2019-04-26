@@ -70,7 +70,19 @@ if(BUILD_SHARED_LIBS)
     add_compile_definitions( JSON_DLL_BUILD )
 endif()
 
+if (JSONCPP_OBJLIB)
+add_library(jsoncppobj_lib OBJECT ${PUBLIC_HEADERS} ${jsoncpp_sources})
+set_target_properties( jsoncppobj_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+target_include_directories( jsoncppobj_lib PRIVATE
+                                $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>)
+								
+	add_library(jsoncpp_headers INTERFACE)
+	set_property(TARGET jsoncpp_headers PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+                                $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>)
+	install( TARGETS jsoncpp_headers ${INSTALL_EXPORT})
+								
+else(JSONCPP_OBJLIB)
 add_library(jsoncpp_lib ${PUBLIC_HEADERS} ${jsoncpp_sources})
 set_target_properties( jsoncpp_lib PROPERTIES VERSION ${JSONCPP_VERSION} SOVERSION ${JSONCPP_SOVERSION})
 set_target_properties( jsoncpp_lib PROPERTIES OUTPUT_NAME jsoncpp
@@ -85,8 +97,14 @@ endif()
 # Specify compiler features required when compiling a given target.
 # See https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html#prop_gbl:CMAKE_CXX_KNOWN_FEATURES
 # for complete list of features available
-target_compile_features(jsoncpp_lib PUBLIC
+
+if(${CMAKE_VERSION} VERSION_GREATER "3.8.0") 
+	target_compile_features(jsoncpp_lib PUBLIC
         cxx_std_11 # Compiler mode is aware of C++ 11.
+		)
+endif()
+
+target_compile_features(jsoncpp_lib PUBLIC
         #MSVC 1900 cxx_alignas # Alignment control alignas, as defined in N2341.
         #MSVC 1900 cxx_alignof # Alignment control alignof, as defined in N2341.
         #MSVC 1900 cxx_attributes # Generic attributes, as defined in N2761.
@@ -143,3 +161,4 @@ if(NOT CMAKE_VERSION VERSION_LESS 2.8.11)
                                 $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>
                                 $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/json>)
 endif()
+endif(JSONCPP_OBJLIB)

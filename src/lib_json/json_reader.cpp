@@ -875,15 +875,15 @@ bool Reader::good() const { return errors_.empty(); }
 class OurFeatures {
 public:
   static OurFeatures all();
-  bool allowComments_;
-  bool strictRoot_;
-  bool allowDroppedNullPlaceholders_;
-  bool allowNumericKeys_;
-  bool allowSingleQuotes_;
-  bool failIfExtra_;
-  bool rejectDupKeys_;
-  bool allowSpecialFloats_;
-  size_t stackLimit_;
+  bool allowComments_{true};
+  bool strictRoot_{false};
+  bool allowDroppedNullPlaceholders_{false};
+  bool allowNumericKeys_{false};
+  bool allowSingleQuotes_{false};
+  bool failIfExtra_{false};
+  bool rejectDupKeys_{false};
+  bool allowSpecialFloats_{false};
+  size_t stackLimit_{1000};
 }; // OurFeatures
 
 OurFeatures OurFeatures::all() { return {}; }
