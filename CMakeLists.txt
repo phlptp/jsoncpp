@@ -62,6 +62,14 @@ if(NOT DEFINED CMAKE_BUILD_TYPE)
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage.")
 endif()
 
+if (NOT JSONCPP_DISABLE_CCACHE)
+	find_program(CCACHE_FOUND ccache)
+	if(CCACHE_FOUND)
+		set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+		set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+	endif(CCACHE_FOUND)
+endif()
+
 project(JSONCPP
         VERSION 1.9.0 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
@@ -148,11 +156,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     endif()
 endif()
 
-find_program(CCACHE_FOUND ccache)
-if(CCACHE_FOUND)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif(CCACHE_FOUND)
 
 if(JSONCPP_WITH_WARNING_AS_ERROR)
     UseCompilationWarningAsError()
