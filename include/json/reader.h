@@ -32,8 +32,8 @@ namespace Json {
  *
  * \deprecated Use CharReader and CharReaderBuilder.
  */
-JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder Instead.")
-class JSON_API Reader {
+class JSON_API
+JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder Instead.") Reader {
 public:
   typedef char Char;
   typedef const Char* Location;
