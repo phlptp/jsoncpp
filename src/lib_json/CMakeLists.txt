@@ -82,7 +82,7 @@ target_include_directories( jsoncppobj_lib PRIVATE
 	set_property(TARGET jsoncpp_headers INTERFACE_INCLUDE_DIRECTORIES
                                 $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>)
 								
-else()
+else(JSONCPP_OBJLIB)
 add_library(jsoncpp_lib ${PUBLIC_HEADERS} ${jsoncpp_sources})
 set_target_properties( jsoncpp_lib PROPERTIES VERSION ${JSONCPP_VERSION} SOVERSION ${JSONCPP_SOVERSION})
 set_target_properties( jsoncpp_lib PROPERTIES OUTPUT_NAME jsoncpp
@@ -160,3 +160,4 @@ if(NOT CMAKE_VERSION VERSION_LESS 2.8.11)
                                 $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
                                 $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>)
 endif()
+endif(JSONCPP_OBJLIB)
