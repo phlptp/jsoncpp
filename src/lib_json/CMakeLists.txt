@@ -71,7 +71,18 @@ if(BUILD_SHARED_LIBS)
     add_definitions( -DJSON_DLL_BUILD )
 endif()
 
+if (JSONCPP_OBJLIB)
+add_library(jsoncppobj_lib OBJECT ${PUBLIC_HEADERS} ${jsoncpp_sources})
+set_target_properties( jsoncppobj_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+target_include_directories( jsoncppobj_lib PRIVATE
+                                $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>)
+								
+	add_library(jsoncpp_headers INTERFACE)
+	set_property(TARGET jsoncpp_headers INTERFACE_INCLUDE_DIRECTORIES
+                                $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>)
+								
+else()
 add_library(jsoncpp_lib ${PUBLIC_HEADERS} ${jsoncpp_sources})
 set_target_properties( jsoncpp_lib PROPERTIES VERSION ${JSONCPP_VERSION} SOVERSION ${JSONCPP_SOVERSION})
 set_target_properties( jsoncpp_lib PROPERTIES OUTPUT_NAME jsoncpp
