@@ -80,6 +80,7 @@ target_include_directories( jsoncppobj_lib PRIVATE
 								
 	add_library(jsoncpp_headers INTERFACE)
 	set_property(TARGET jsoncpp_headers PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+				$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
                                 $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>)
 	install( TARGETS jsoncpp_headers ${INSTALL_EXPORT})
 								
