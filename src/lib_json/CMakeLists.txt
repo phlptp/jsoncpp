@@ -66,10 +66,6 @@ else(JSONCPP_WITH_CMAKE_PACKAGE)
     set(INSTALL_EXPORT)
 endif()
 
-if(BUILD_SHARED_LIBS)
-    add_compile_definitions( JSON_DLL_BUILD )
-endif()
-
 if (JSONCPP_OBJLIB)
 add_library(jsoncppobj_lib OBJECT ${PUBLIC_HEADERS} ${jsoncpp_sources})
 set_target_properties( jsoncppobj_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -94,6 +90,10 @@ set_target_properties( jsoncpp_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # Set library's runtime search path on OSX
 if(APPLE)
     set_target_properties( jsoncpp_lib PROPERTIES INSTALL_RPATH "@loader_path/." )
+endif()
+
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions( jsoncpp_lib PUBLIC JSON_DLL_BUILD )
 endif()
 
 # Specify compiler features required when compiling a given target.
@@ -151,7 +151,7 @@ target_compile_features(jsoncpp_lib PUBLIC
         cxx_variadic_macros # Variadic macros, as defined in N1653.
         cxx_variadic_templates # Variadic templates, as defined in N2242.
 )
-if (NOT JSONCPP_BINARY_ONLY_INSTALL OR BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS OR NOT JSONCPP_BINARY_ONLY_INSTALL)
 install( TARGETS jsoncpp_lib ${INSTALL_EXPORT}
           RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
           LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
