@@ -80,7 +80,9 @@ target_include_directories( jsoncppobj_lib PRIVATE
 	add_library(jsoncpp_headers INTERFACE)
 	set_property(TARGET jsoncpp_headers PROPERTY INTERFACE_INCLUDE_DIRECTORIES
                                 $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>)
-	install( TARGETS jsoncpp_headers ${INSTALL_EXPORT})
+	if (NOT JSONCPP_BINARY_ONLY_INSTALL)
+		install( TARGETS jsoncpp_headers ${INSTALL_EXPORT})
+	endif()
 								
 else(JSONCPP_OBJLIB)
 add_library(jsoncpp_lib ${PUBLIC_HEADERS} ${jsoncpp_sources})
@@ -149,12 +151,13 @@ target_compile_features(jsoncpp_lib PUBLIC
         cxx_variadic_macros # Variadic macros, as defined in N1653.
         cxx_variadic_templates # Variadic templates, as defined in N2242.
 )
-
+if (NOT JSONCPP_BINARY_ONLY_INSTALL OR BUILD_SHARED_LIBS)
 install( TARGETS jsoncpp_lib ${INSTALL_EXPORT}
           RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
           LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
+endif()
 if(NOT CMAKE_VERSION VERSION_LESS 2.8.11)
     target_include_directories( jsoncpp_lib PUBLIC
                                 $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
