@@ -267,6 +267,14 @@ static String toHex16Bit(unsigned int x) {
   return result;
 }
 
+static void appendRaw(String& result, unsigned ch) {
+  result += static_cast<char>(ch);
+}
+
+static void appendHex(String& result, unsigned ch) {
+  result.append("\\u").append(toHex16Bit(ch));
+}
+
 static String valueToQuotedStringN(const char* value, unsigned length) {
   if (value == nullptr)
     return "";
@@ -313,21 +321,11 @@ static String valueToQuotedStringN(const char* value, unsigned length) {
     // Should add a flag to allow this compatibility mode and prevent this
     // sequence from occurring.
     default: {
-      unsigned int cp = utf8ToCodepoint(c, end);
-      // don't escape non-control characters
-      // (short escape sequence are applied above)
-      if (cp < 0x80 && cp >= 0x20)
-        result += static_cast<char>(cp);
-      else if (cp < 0x10000) { // codepoint is in Basic Multilingual Plane
-        result += "\\u";
-        result += toHex16Bit(cp);
-      } else { // codepoint is not in Basic Multilingual Plane
-               // convert to surrogate pair first
-        cp -= 0x10000;
-        result += "\\u";
-        result += toHex16Bit((cp >> 10) + 0xD800);
-        result += "\\u";
-        result += toHex16Bit((cp & 0x3FF) + 0xDC00);
+      unsigned codepoint = static_cast<unsigned char>(*c);
+      if (codepoint < 0x20) {
+        appendHex(result, codepoint);
+      } else {
+        appendRaw(result, codepoint);
       }
     } break;
     }
